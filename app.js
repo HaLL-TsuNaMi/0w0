@@ -134,39 +134,6 @@ switch(msg.content) {
 		msg.member.voiceChannel.leave();
 		msg.channel.reply("Don't have to be so wude I wiww weave UmU");
 		break;
-	case config.prefix + "play":
-		if(!args[1]) {
-			msg.channel.sendMessage("Pweaze pwovide a wink UwU");
-			return;
-		}
-
-		if(!msg.member.voiceChannel) {
-			msg.channel.sendMessage("You must be in a voice channew UmU");
-			return;
-		}
-
-		if(!servers[msg.guild.id]) servers[msg.guild.id] = {
-			queue: []
-		}
-
-		var server = servers[msg.guild.id];
-
-		server.queue.push(args[1]);
-
-		if(!msg.guild.voiceConnection) msg.member.voiceChannel.join().then(function(connection) {
-			play(connection, msg);
-		});
-		break;
-	case config.prefix + "skip":
-		var server = servers[msg.guild.id];
-
-		if(server.dispatcher) server.dispatcher.end();
-		break;
-	case config.prefix + "stop":
-		var server = servers[msg.guild.id];
-
-		if(server.guild.voiceConnection) msg.guild.voiceConnection.disconnect();
-		break;
 	}
 });
 
