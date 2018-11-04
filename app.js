@@ -70,22 +70,40 @@ switch(msg.content) {
 
 /* Music bot commands */
 function play(connection, msg) {
+// Play streams using ytdl-core
+const ytdl = require('ytdl-core');
+const streamOptions = { seek: 0, volume: 1 };
+const broadcast = client.createVoiceBroadcast();
 
-	server.dispatcher = connection.playStream(ytdl(server.queue[0], {filter: "audioonly"}));
+voiceChannel.join()
+  .then(connection => {
+    const stream = ytdl('https://www.youtube.com/watch?v=XAWgeLF9EVQ', { filter : 'audioonly' });
+    broadcast.playStream(stream);
+    const dispatcher = connection.playBroadcast(broadcast);
+  })
+  .catch(console.error);
 
-	server.queue.shift();
-
-	server.dispatcher.on("end", function() {
-		if(server.queue[0]) play(connection, msg);
-		else connection.disconnect();
-	});
+  switch(msg.content) {
+	case config.prefix + "play":
+		broadcast.playStream("https://www.youtube.com/watch?v=U06jlgpMtQs");
+		break;
+  }
 }
 
 bot.on("message", function(msg, channel) {
 	switch(msg.content) {
 		case config.prefix + "play":
-			msg.member.voiceChannel.join();
-			play();
+			const ytdl = require('ytdl-core');
+			const streamOptions = { seek: 0, volume: 1 };
+			const broadcast = bot.createVoiceBroadcast();
+
+			msg.member.voiceChannel.join()
+			.then(connection => {
+				const stream = ytdl('https://www.youtube.com/watch?v=XAWgeLF9EVQ', { filter : 'audioonly' });
+				broadcast.playStream(stream);
+				const dispatcher = connection.playBroadcast(broadcast);
+			})
+			.catch(console.error);
 			break;
 	}
 });
