@@ -93,6 +93,10 @@ Search npm help documentation
 
 Get help on npm
 
+### npm-hook(1)
+
+Manage registry hooks
+
 ### npm-init(1)
 
 create a package.json file

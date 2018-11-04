@@ -32,7 +32,7 @@ const tar = require('tar')
 const packlist = require('npm-packlist')
 const ssri = require('ssri')
 
-pack.usage = 'npm pack [[<@scope>/]<pkg>...]'
+pack.usage = 'npm pack [[<@scope>/]<pkg>...] [--dry-run]'
 
 // if it can be installed, it can be packed.
 pack.completion = install.completion
@@ -64,26 +64,17 @@ function pack_ (pkg, dir) {
   return BB.fromNode((cb) => fpm(pkg, dir, cb)).then((mani) => {
     let name = mani.name[0] === '@'
     // scoped packages get special treatment
-    ? mani.name.substr(1).replace(/\//g, '-')
-    : mani.name
+      ? mani.name.substr(1).replace(/\//g, '-')
+      : mani.name
     const target = `${name}-${mani.version}.tgz`
     return pinflight(target, () => {
+      const dryRun = npm.config.get('dry-run')
       if (mani._requested.type === 'directory') {
-        return cacache.tmp.withTmp(npm.tmp, {tmpPrefix: 'packing'}, (tmp) => {
-          const tmpTarget = path.join(tmp, path.basename(target))
-          return prepareDirectory(mani._resolved)
+        return prepareDirectory(mani._resolved)
           .then(() => {
-            return packDirectory(mani, mani._resolved, tmpTarget, target, true)
+            return packDirectory(mani, mani._resolved, target, target, true, dryRun)
           })
-          .tap(() => {
-            if (npm.config.get('dry-run')) {
-              log.verbose('pack', '--dry-run mode enabled. Skipping write.')
-            } else {
-              return move(tmpTarget, target, {Promise: BB, fs})
-            }
-          })
-        })
-      } else if (npm.config.get('dry-run')) {
+      } else if (dryRun) {
         log.verbose('pack', '--dry-run mode enabled. Skipping write.')
         return cacache.tmp.withTmp(npm.tmp, {tmpPrefix: 'packing'}, (tmp) => {
           const tmpTarget = path.join(tmp, path.basename(target))
@@ -99,12 +90,12 @@ function pack_ (pkg, dir) {
 function packFromPackage (arg, target, filename) {
   const opts = pacoteOpts()
   return pacote.tarball.toFile(arg, target, pacoteOpts())
-  .then(() => cacache.tmp.withTmp(npm.tmp, {tmpPrefix: 'unpacking'}, (tmp) => {
-    const tmpTarget = path.join(tmp, filename)
-    return pacote.extract(arg, tmpTarget, opts)
-    .then(() => readJson(path.join(tmpTarget, 'package.json')))
-  }))
-  .then((pkg) => getContents(pkg, target, filename))
+    .then(() => cacache.tmp.withTmp(npm.tmp, {tmpPrefix: 'unpacking'}, (tmp) => {
+      const tmpTarget = path.join(tmp, filename)
+      return pacote.extract(arg, tmpTarget, opts)
+        .then(() => readJson(path.join(tmpTarget, 'package.json')))
+    }))
+    .then((pkg) => getContents(pkg, target, filename))
 }
 
 module.exports.prepareDirectory = prepareDirectory
@@ -137,7 +128,7 @@ function prepareDirectory (dir) {
 }
 
 module.exports.packDirectory = packDirectory
-function packDirectory (mani, dir, target, filename, logIt) {
+function packDirectory (mani, dir, target, filename, logIt, dryRun) {
   deprCheck(mani)
   return readJson(path.join(dir, 'package.json')).then((pkg) => {
     return lifecycle(pkg, 'prepack', dir)
@@ -165,7 +156,13 @@ function packDirectory (mani, dir, target, filename, logIt) {
         .then((files) => tar.create(tarOpt, files.map((f) => `./${f}`)))
         .then(() => getContents(pkg, tmpTarget, filename, logIt))
         // thread the content info through
-        .tap(() => move(tmpTarget, target, {Promise: BB, fs}))
+        .tap(() => {
+          if (dryRun) {
+            log.verbose('pack', '--dry-run mode enabled. Skipping write.')
+          } else {
+            return move(tmpTarget, target, {Promise: BB, fs})
+          }
+        })
         .tap(() => lifecycle(pkg, 'postpack', dir))
     })
   })
@@ -222,14 +219,14 @@ function getContents (pkg, target, filename, silent) {
   const bundled = new Set()
   let totalEntries = 0
   let totalEntrySize = 0
-  return BB.resolve(tar.t({
+  return tar.t({
     file: target,
     onentry (entry) {
       totalEntries++
       totalEntrySize += entry.size
       const p = entry.path
       if (p.startsWith('package/node_modules/')) {
-        const name = p.match(/^package\/node_modules\/((?:@[^/]+)?[^/]+)/)[1]
+        const name = p.match(/^package\/node_modules\/((?:@[^/]+\/)?[^/]+)/)[1]
         if (bundledWanted.has(name)) {
           bundled.add(name)
         }
@@ -242,30 +239,30 @@ function getContents (pkg, target, filename, silent) {
       }
     },
     strip: 1
-  }))
-  .then(() => BB.all([
-    BB.fromNode((cb) => fs.stat(target, cb)),
-    ssri.fromStream(fs.createReadStream(target), {
-      algorithms: ['sha1', 'sha512']
-    })
-  ]))
-  .spread((stat, integrity) => {
-    const shasum = integrity['sha1'][0].hexDigest()
-    return {
-      id: pkg._id,
-      name: pkg.name,
-      version: pkg.version,
-      from: pkg._from,
-      size: stat.size,
-      unpackedSize: totalEntrySize,
-      shasum,
-      integrity: ssri.parse(integrity['sha512'][0]),
-      filename,
-      files,
-      entryCount: totalEntries,
-      bundled: Array.from(bundled)
-    }
   })
+    .then(() => BB.all([
+      BB.fromNode((cb) => fs.stat(target, cb)),
+      ssri.fromStream(fs.createReadStream(target), {
+        algorithms: ['sha1', 'sha512']
+      })
+    ]))
+    .then(([stat, integrity]) => {
+      const shasum = integrity['sha1'][0].hexDigest()
+      return {
+        id: pkg._id,
+        name: pkg.name,
+        version: pkg.version,
+        from: pkg._from,
+        size: stat.size,
+        unpackedSize: totalEntrySize,
+        shasum,
+        integrity: ssri.parse(integrity['sha512'][0]),
+        filename,
+        files,
+        entryCount: totalEntries,
+        bundled: Array.from(bundled)
+      }
+    })
 }
 
 const PASSTHROUGH_OPTS = [

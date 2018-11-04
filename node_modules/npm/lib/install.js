@@ -1,4 +1,6 @@
 'use strict'
+/* eslint-disable camelcase */
+/* eslint-disable standard/no-callback-literal */
 // npm install <pkg> <pkg> <pkg>
 //
 // See doc/cli/npm-install.md for more description
@@ -182,8 +184,8 @@ function install (where, args, cb) {
   var globalTop = path.resolve(npm.globalDir, '..')
   if (!where) {
     where = npm.config.get('global')
-          ? globalTop
-          : npm.prefix
+      ? globalTop
+      : npm.prefix
   }
   validate('SAF', [where, args, cb])
   // the /path/to/node_modules/..
@@ -634,7 +636,7 @@ Installer.prototype.startAudit = function (cb) {
     return audit.generateFromInstall(this.idealTree, this.differences, this.args, this.remove)
   }).then((auditData) => {
     return audit.submitForInstallReport(auditData)
-  }).catch(() => {})
+  }).catch(_ => {})
   cb()
 }
 
@@ -764,6 +766,9 @@ Installer.prototype.printInstalled = function (cb) {
     if (!this.auditSubmission) return
     return Bluebird.resolve(this.auditSubmission).timeout(10000).catch(() => null)
   }).then((auditResult) => {
+    if (auditResult && !auditResult.metadata) {
+      log.warn('audit', 'Audit result from registry missing metadata. This is probably an issue with the registry.')
+    }
     // maybe write audit report w/ hash of pjson & shrinkwrap for later reading by `npm audit`
     if (npm.config.get('json')) {
       return this.printInstalledForJSON(diffs, auditResult)
@@ -832,6 +837,9 @@ Installer.prototype.printInstalledForHuman = function (diffs, auditResult) {
   if (removed) actions.push('removed ' + packages(removed))
   if (updated) actions.push('updated ' + packages(updated))
   if (moved) actions.push('moved ' + packages(moved))
+  if (auditResult && auditResult.metadata && auditResult.metadata.totalDependencies) {
+    actions.push('audited ' + packages(auditResult.metadata.totalDependencies))
+  }
   if (actions.length === 0) {
     report += 'up to date'
   } else if (actions.length === 1) {

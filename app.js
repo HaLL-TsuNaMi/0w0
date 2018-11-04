@@ -4,12 +4,14 @@ const config = require("./config.json");
 const request = require("request");
 const opusscript = require("opusscript");
 const ytdl = require("ytdl-core");
+const fs = require("fs");
 const pack = require("./package.json");
 
 /* functions for later */
 bot.on("ready", function() {
 	bot.user.setActivity("with DJ Set");
 	console.log("I am weady UwU!");
+	console.log(`[Start] ${new Date()}`);
 });
 
 /* basic commands for 0w0 */
@@ -51,6 +53,40 @@ bot.on("message", function(msg) {
 				title: "ping, info, shutdown, and the command you just used UwU",
 				timestamp: new Date()
 		}});
+	}
+
+// Lets 0w0 leave a voice channel
+switch(msg.content) {
+	case config.prefix + "leave":
+		msg.member.voiceChannel.leave();
+		msg.reply("Don't have to be so wude I wiww weave UmU");
+		break;
+	case config.prefix + "summon":
+		msg.member.voiceChannel.join();
+		msg.reply("I've been summoned!!! UwU");
+		break;
+	}
+});
+
+/* Music bot commands */
+function play(connection, msg) {
+
+	server.dispatcher = connection.playStream(ytdl(server.queue[0], {filter: "audioonly"}));
+
+	server.queue.shift();
+
+	server.dispatcher.on("end", function() {
+		if(server.queue[0]) play(connection, msg);
+		else connection.disconnect();
+	});
+}
+
+bot.on("message", function(msg, channel) {
+	switch(msg.content) {
+		case config.prefix + "play":
+			msg.member.voiceChannel.join();
+			play();
+			break;
 	}
 });
 
@@ -94,46 +130,6 @@ bot.on("message", function(msg) {
 		case config.prefix + "shutdown":
 			shutdown(msg.channel);
 			break;
-	}
-});
-
-/* Music bot commands */
-function play(connection, msg) {
-	var server = servers[msg.guild.id];
-
-	server.dispatcher = connection.playStream(ytdl(server.queue[0], {filter: "audioonly"}));
-
-	server.queue.shift();
-
-	server.dispatcher.on("end", function() {
-		if(server.queue[0]) play(connection, msg);
-		else connection.disconnect();
-	});
-}
-
-bot.on("message", function(msg) {
-// Lets 0w0 join a voice channel
-if (!msg.guild) return;
-
-if (msg.content === config.prefix + "join") {
-	// Only try to join the sender's voice channel if they are in one themselves
-    if (msg.member.voiceChannel) {
-      msg.member.voiceChannel.join()
-        .then(connection => { // Connection is an instance of VoiceConnection
-          msg.reply('I joined!!! UwU');
-        })
-        .catch(console.log);
-    } else {
-      msg.reply('You gotta join a voice channew fiwst UmU');
-    }
-  }
-
-// Lets 0w0 leave a voice channel
-switch(msg.content) {
-	case config.prefix + "leave":
-		msg.member.voiceChannel.leave();
-		msg.channel.reply("Don't have to be so wude I wiww weave UmU");
-		break;
 	}
 });
 

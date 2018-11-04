@@ -46,7 +46,7 @@ var affordances = {
   'rm': 'uninstall',
   'r': 'uninstall',
   'rum': 'run-script',
-  'sit': 'install-ci-test',
+  'sit': 'cit',
   'urn': 'run-script'
 }
 
@@ -65,6 +65,7 @@ var cmdList = [
   'prune',
   'pack',
   'dedupe',
+  'hook',
 
   'rebuild',
   'link',

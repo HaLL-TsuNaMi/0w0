@@ -51,7 +51,7 @@ function pkgIntegrity (pkg) {
     if (Object.keys(integrity).length === 0) return
     return integrity
   } catch (ex) {
-    return
+
   }
 }
 

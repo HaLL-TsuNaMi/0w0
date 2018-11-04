@@ -304,7 +304,7 @@ function errorMessage (er) {
         ])
         break
       } // else passthrough
-      /*eslint no-fallthrough:0*/
+      /* eslint no-fallthrough:0 */
 
     case 'ENOSPC':
       short.push(['nospc', er.message])
@@ -348,7 +348,7 @@ function errorMessage (er) {
         'typeerror',
         [
           'This is an error with npm itself. Please report this error at:',
-          '    <https://github.com/npm/npm/issues>'
+          '    <https://npm.community>'
         ].join('\n')
       ])
       break

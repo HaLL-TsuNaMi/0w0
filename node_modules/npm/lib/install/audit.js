@@ -4,6 +4,7 @@ exports.generateFromInstall = generateFromInstall
 exports.submitForInstallReport = submitForInstallReport
 exports.submitForFullReport = submitForFullReport
 exports.printInstallReport = printInstallReport
+exports.printParseableReport = printParseableReport
 exports.printFullReport = printFullReport
 
 const Bluebird = require('bluebird')
@@ -30,32 +31,32 @@ const runId = uuid.v4()
 
 function submitForInstallReport (auditData) {
   const cfg = npm.config // avoid the no-dynamic-lookups test
-  const scopedRegistries = cfg.keys.filter((_) => /:registry$/.test(_)).map((_) => cfg.get(_))
+  const scopedRegistries = cfg.keys.filter(_ => /:registry$/.test(_)).map(_ => cfg.get(_))
   perf.emit('time', 'audit compress')
   // TODO: registryFetch will be adding native support for `Content-Encoding: gzip` at which point
   // we'll pass in something like `gzip: true` and not need to JSON stringify, gzip or headers.
-  return gzip(JSON.stringify(auditData)).then((body) => {
+  return gzip(JSON.stringify(auditData)).then(body => {
     perf.emit('timeEnd', 'audit compress')
     log.info('audit', 'Submitting payload of ' + body.length + 'bytes')
-    scopedRegistries.forEach((reg) => {
+    scopedRegistries.forEach(reg => {
       // we don't care about the response so destroy the stream if we can, or leave it flowing
       // so it can eventually finish and clean up after itself
       fetchAudit(url.resolve(reg, '/-/npm/v1/security/audits/quick'))
-        .then((_) => {
+        .then(_ => {
           _.body.on('error', () => {})
           if (_.body.destroy) {
             _.body.destroy()
           } else {
             _.body.resume()
           }
-        }, () => {})
+        }, _ => {})
     })
     perf.emit('time', 'audit submit')
-    return fetchAudit('/-/npm/v1/security/audits/quick', body).then((response) => {
+    return fetchAudit('/-/npm/v1/security/audits/quick', body).then(response => {
       perf.emit('timeEnd', 'audit submit')
       perf.emit('time', 'audit body')
       return response.json()
-    }).then((result) => {
+    }).then(result => {
       perf.emit('timeEnd', 'audit body')
       return result
     })
@@ -66,16 +67,17 @@ function submitForFullReport (auditData) {
   perf.emit('time', 'audit compress')
   // TODO: registryFetch will be adding native support for `Content-Encoding: gzip` at which point
   // we'll pass in something like `gzip: true` and not need to JSON stringify, gzip or headers.
-  return gzip(JSON.stringify(auditData)).then((body) => {
+  return gzip(JSON.stringify(auditData)).then(body => {
     perf.emit('timeEnd', 'audit compress')
     log.info('audit', 'Submitting payload of ' + body.length + ' bytes')
     perf.emit('time', 'audit submit')
-    return fetchAudit('/-/npm/v1/security/audits', body).then((response) => {
+    return fetchAudit('/-/npm/v1/security/audits', body).then(response => {
       perf.emit('timeEnd', 'audit submit')
       perf.emit('time', 'audit body')
       return response.json()
-    }).then((result) => {
+    }).then(result => {
       perf.emit('timeEnd', 'audit body')
+      result.runId = runId
       return result
     })
   })
@@ -99,16 +101,25 @@ function printInstallReport (auditResult) {
     reporter: 'install',
     withColor: npm.color,
     withUnicode: npm.config.get('unicode')
-  }).then((result) => output(result.report))
+  }).then(result => output(result.report))
 }
 
 function printFullReport (auditResult) {
   return auditReport(auditResult, {
     log: output,
-    reporter: 'detail',
+    reporter: npm.config.get('json') ? 'json' : 'detail',
     withColor: npm.color,
     withUnicode: npm.config.get('unicode')
-  }).then((result) => output(result.report))
+  }).then(result => output(result.report))
+}
+
+function printParseableReport (auditResult) {
+  return auditReport(auditResult, {
+    log: output,
+    reporter: 'parseable',
+    withColor: npm.color,
+    withUnicode: npm.config.get('unicode')
+  }).then(result => output(result.report))
 }
 
 function generate (shrinkwrap, requires, diffs, install, remove) {
@@ -131,13 +142,13 @@ const deleteKeys = qw`from resolved`
 
 function scrubDeps (deps) {
   if (!deps) return
-  Object.keys(deps).forEach((name) => {
+  Object.keys(deps).forEach(name => {
     if (!shouldScrubName(name) && !shouldScrubSpec(name, deps[name].version)) return
     const value = deps[name]
     delete deps[name]
     deps[scrub(name)] = value
   })
-  Object.keys(deps).forEach((name) => {
+  Object.keys(deps).forEach(name => {
     for (let toScrub of scrubKeys) {
       if (!deps[name][toScrub]) continue
       deps[name][toScrub] = scrubSpec(name, deps[name][toScrub])
@@ -151,7 +162,7 @@ function scrubDeps (deps) {
 
 function scrubRequires (reqs) {
   if (!reqs) return reqs
-  Object.keys(reqs).forEach((name) => {
+  Object.keys(reqs).forEach(name => {
     const spec = reqs[name]
     if (shouldScrubName(name) || shouldScrubSpec(name, spec)) {
       delete reqs[name]
@@ -207,8 +218,9 @@ function scrubSpec (name, spec) {
   }
 }
 
-function scrub (value) {
-  return ssri.fromData(runId + ' ' + value, {algorithms: ['sha256']}).hexDigest()
+module.exports.scrub = scrub
+function scrub (value, rid) {
+  return ssri.fromData((rid || runId) + ' ' + value, {algorithms: ['sha256']}).hexDigest()
 }
 
 function generateMetadata () {

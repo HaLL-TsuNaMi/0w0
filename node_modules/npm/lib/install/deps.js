@@ -52,13 +52,9 @@ function doesChildVersionMatch (child, requested, requestor) {
   }
 
   if (requested.type === 'git' && child.fromShrinkwrap) {
-    const fromSw = child.fromShrinkwrap
-
-    if (fromSw.rawSpec === requested.rawSpec) return true
-
-    if (!fromSw.hosted || !requested.hosted) return false
-
-    return fromSw.hosted.toString() === requested.hosted.toString()
+    const fromSw = child.package._from ? npa(child.package._from) : child.fromShrinkwrap
+    fromSw.name = requested.name // we're only checking specifiers here
+    if (fromSw.toString() === requested.toString()) return true
   }
 
   if (!registryTypes[requested.type]) {
@@ -89,8 +85,8 @@ function doesChildVersionMatch (child, requested, requestor) {
   }
 }
 
-function childDependencySpecifier (tree, name, spec) {
-  return npa.resolve(name, spec, packageRelativePath(tree))
+function childDependencySpecifier (tree, name, spec, where) {
+  return npa.resolve(name, spec, where || packageRelativePath(tree))
 }
 
 exports.computeMetadata = computeMetadata
@@ -115,7 +111,6 @@ function computeMetadata (tree, seen) {
       resolveWithExistingModule(child, tree)
       return true
     }
-    return
   }
 
   const deps = tree.package.dependencies || {}
@@ -197,15 +192,14 @@ function packageRelativePath (tree) {
   var requested = tree.package._requested || {}
   var isLocal = requested.type === 'directory' || requested.type === 'file'
   return isLocal ? requested.fetchSpec
-       : (tree.isLink || tree.isInLink) && !preserveSymlinks() ? tree.realpath
-       : tree.path
+    : (tree.isLink || tree.isInLink) && !preserveSymlinks() ? tree.realpath
+      : tree.path
 }
 
 function matchingDep (tree, name) {
   if (!tree || !tree.package) return
   if (tree.package.dependencies && tree.package.dependencies[name]) return tree.package.dependencies[name]
   if (tree.package.devDependencies && tree.package.devDependencies[name]) return tree.package.devDependencies[name]
-  return
 }
 
 exports.getAllMetadata = function (args, tree, where, next) {
@@ -294,10 +288,12 @@ function computeVersionSpec (tree, child) {
   validate('OO', arguments)
   var requested
   var childReq = child.package._requested
-  if (childReq && (isNotEmpty(childReq.saveSpec) || (isNotEmpty(childReq.rawSpec) && isNotEmpty(childReq.fetchSpec)))) {
+  if (child.isLink) {
+    requested = npa.resolve(child.package.name, 'file:' + child.realpath, getTop(tree).path)
+  } else if (childReq && (isNotEmpty(childReq.saveSpec) || (isNotEmpty(childReq.rawSpec) && isNotEmpty(childReq.fetchSpec)))) {
     requested = child.package._requested
   } else if (child.package._from) {
-    requested = npa(child.package._from)
+    requested = npa(child.package._from, tree.path)
   } else {
     requested = npa.resolve(child.package.name, child.package.version)
   }
@@ -311,7 +307,7 @@ function computeVersionSpec (tree, child) {
     }
     return rangeDescriptor + version
   } else if (requested.type === 'directory' || requested.type === 'file') {
-    return 'file:' + unixFormatPath(path.relative(tree.path, requested.fetchSpec))
+    return 'file:' + unixFormatPath(path.relative(getTop(tree).path, requested.fetchSpec))
   } else {
     return requested.saveSpec || requested.rawSpec
   }
@@ -551,7 +547,7 @@ function addDependency (name, versionSpec, tree, log, done) {
   try {
     var req = childDependencySpecifier(tree, name, versionSpec)
     if (tree.swRequires && tree.swRequires[name]) {
-      var swReq = childDependencySpecifier(tree, name, tree.swRequires[name])
+      var swReq = childDependencySpecifier(tree, name, tree.swRequires[name], tree.package._where)
     }
   } catch (err) {
     return done(err)

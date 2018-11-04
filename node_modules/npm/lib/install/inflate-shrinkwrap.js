@@ -101,7 +101,7 @@ function inflatableChild (onDiskChild, name, topPath, tree, sw, requested, opts)
     sw.resolved = sw.version
     sw.version = regTarball
   }
-  if (sw.requires) Object.keys(sw.requires).map((_) => { sw.requires[_] = tarballToVersion(_, sw.requires[_]) || sw.requires[_] })
+  if (sw.requires) Object.keys(sw.requires).map(_ => { sw.requires[_] = tarballToVersion(_, sw.requires[_]) || sw.requires[_] })
   const modernLink = requested.type === 'directory' && !sw.from
   if (hasModernMeta(onDiskChild) && childIsEquivalent(sw, requested, onDiskChild)) {
     // The version on disk matches the shrinkwrap entry.
@@ -167,7 +167,7 @@ function makeFakeChild (name, topPath, tree, sw, requested) {
   }
   const child = createChild({
     package: pkg,
-    loaded: true,
+    loaded: false,
     parent: tree,
     children: [],
     fromShrinkwrap: requested,
