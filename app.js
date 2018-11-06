@@ -99,7 +99,7 @@ bot.on("message", function(msg, channel) {
 
 			msg.member.voiceChannel.join()
 			.then(connection => {
-				const stream = ytdl('https://www.youtube.com/watch?v=XAWgeLF9EVQ', { filter : 'audioonly' });
+				const stream = ytdl('https://youtu.be/UzZGO9hgpBU', { filter : 'audioonly' });
 				broadcast.playStream(stream);
 				const dispatcher = connection.playBroadcast(broadcast);
 			})
