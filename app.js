@@ -69,27 +69,6 @@ switch(msg.content) {
 });
 
 /* Music bot commands */
-function play(connection, msg) {
-// Play streams using ytdl-core
-const ytdl = require('ytdl-core');
-const streamOptions = { seek: 0, volume: 1 };
-const broadcast = client.createVoiceBroadcast();
-
-voiceChannel.join()
-  .then(connection => {
-    const stream = ytdl('https://www.youtube.com/watch?v=XAWgeLF9EVQ', { filter : 'audioonly' });
-    broadcast.playStream(stream);
-    const dispatcher = connection.playBroadcast(broadcast);
-  })
-  .catch(console.error);
-
-  switch(msg.content) {
-	case config.prefix + "play":
-		broadcast.playStream("https://www.youtube.com/watch?v=U06jlgpMtQs");
-		break;
-  }
-}
-
 bot.on("message", function(msg, channel) {
 	switch(msg.content) {
 		case config.prefix + "play":
