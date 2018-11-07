@@ -18,6 +18,7 @@
     "start": "^5.1.0",
     "update": "^0.7.4",
     "youtube-info": "^1.2.0",
+    "yt-search": "^0.3.0",
     "ytdl-core": "^0.27.1"
   },
   "devDependencies": {},

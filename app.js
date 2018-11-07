@@ -69,15 +69,38 @@ switch(msg.content) {
 });
 
 /* Music bot commands */
-bot.on("message", function(msg, channel) {
+/*function play(connection, msg) {
+	var server = servers[msg.guild.id];
+	server.dispatcher = connection.playStream(ytdl(server.queue[0], {filter: "audioonly"}));
+	server.queue.shift();
+	server.dispatcher.on("end", function() {
+		if(server.queue[0]) play(connection, msg);
+		else connection.disconnect();
+	});
+}*/
+
+bot.on("message", function(msg, channel, args, queue) {
 	switch(msg.content) {
 		case config.prefix + "play":
 			const ytdl = require('ytdl-core');
 			const streamOptions = { seek: 0, volume: 1 };
 			const broadcast = bot.createVoiceBroadcast();
 
-			msg.member.voiceChannel.join()
-			.then(connection => {
+			/*if(!args[1]) {
+				msg.channel.reply("pweaze make suwe you typed wight wink UmU");
+				return;
+			}
+			if(!servers[msg.guild.id]) servers[msg.guild.id] = {
+				queue: []
+			}
+
+			var server = servers[msg.guild.id];
+
+			server.queue.push(args[1]);*/
+
+			
+			//play(connection, msg);
+			msg.member.voiceChannel.join().then(connection => {
 				const stream = ytdl('https://youtu.be/UzZGO9hgpBU', { filter : 'audioonly' });
 				broadcast.playStream(stream);
 				const dispatcher = connection.playBroadcast(broadcast);
