@@ -47,11 +47,70 @@ function shutdown(channel) {
 	bot.destroy();
 }
 
+function getID(str, cb) {
+	if(isYoutube(str)) {
+		cb(getYoutubeID(str));
+	} else {
+		search_video(str, function(id) {
+			cb(id);
+		});
+	}
+}
 
+function add_to_queue(strID) {
+	if(isYoutube(strID)) {
+		queue.push(getYoutubeID(strID));
+	} else {
+		queue.push(strID);
+	}
+}
+
+function search_video(query, callback) {
+    request("https://www.googleapis.com/youtube/v3/search?part=id&type=video&q=" + encodeURIComponent(query) + "&key=" + config.ytKey, function(error, response, body) {
+        var json = JSON.parse(body);
+        if (!json.items[0]) callback("3_-a9nVZYjk");
+        else {
+            callback(json.items[0].id.videoId);
+        }
+    });
+}
+
+function isYoutube(str) {
+	return str.toLowerCase().indexOf("youtube.com") > -1;
+}
+
+function skipSong (msg) {
+	dispatcher.end();
+}
+
+function playMusic(id, msg) {
+	voiceChannel = msg.member.voiceChannel;
+	voiceChannel.join().then(function(connection) {
+		stream = ytdl("https://www.youtube.com/watch?v=" + id, { filter: "audioonly"});
+		skipReq = 0;
+		skippers = [];
+
+		dispatcher = connection.playStream(stream);
+		dispatcher.on("end", function() {
+			skipReq = 0;
+			skippers = [];
+			queue.shift();
+			if(queue.length === 0) {
+				queue = [];
+				isPlaying = false;
+			} else {
+				playMusic(queue[0], msg);
+			}
+		});
+	});
+}
 
 bot.on("ready", function() {
 	bot.user.setActivity("with DJ Set");
 	console.log("I am weady UwU!");
+	if(isPlaying === true) {
+		bot.user.setActivity(videoInfo.title);
+	}
 });
 
 bot.on("message", function(msg) {
@@ -152,42 +211,8 @@ bot.on("message", function(msg) {
 		}
 );
 
-
-
-function getID(str, cb) {
-	if(isYoutube(str)) {
-		cb(getYoutubeID(str));
-	} else {
-		search_video(str, function(id) {
-			cb(id);
-		});
-	}
-}
-
-function add_to_queue(strID) {
-	if(isYoutube(strID)) {
-		queue.push(getYoutubeID(strID));
-	} else {
-		queue.push(strID);
-	}
-}
-
-function search_video(query, callback) {
-    request("https://www.googleapis.com/youtube/v3/search?part=id&type=video&q=" + encodeURIComponent(query) + "&key=" + config.ytKey, function(error, response, body) {
-        var json = JSON.parse(body);
-        if (!json.items[0]) callback("3_-a9nVZYjk");
-        else {
-            callback(json.items[0].id.videoId);
-        }
-    });
-}
-
-function isYoutube(str) {
-	return str.toLowerCase().indexOf("youtube.com") > -1;
-}
-
+// Music bot commands 0w0
 bot.on("message", function(msg, args) {
-
 	const member = msg.member;
 	const mess = msg.content.toLowerCase();
 	var args = msg.content.split(" ").slice(1).join(" ");
@@ -231,31 +256,5 @@ bot.on("message", function(msg, args) {
 		}
 	}
 });
-
-function skipSong (msg) {
-	dispatcher.end();
-}
-
-function playMusic(id, msg) {
-	voiceChannel = msg.member.voiceChannel;
-	voiceChannel.join().then(function(connection) {
-		stream = ytdl("https://www.youtube.com/watch?v=" + id, { filter: "audioonly"});
-		skipReq = 0;
-		skippers = [];
-
-		dispatcher = connection.playStream(stream);
-		dispatcher.on("end", function() {
-			skipReq = 0;
-			skippers = [];
-			queue.shift();
-			if(queue.length === 0) {
-				queue = [];
-				isPlaying = false;
-			} else {
-				playMusic(queue[0], msg);
-			}
-		});
-	});
-}
 
 bot.login(config.token);
