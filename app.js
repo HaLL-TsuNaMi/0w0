@@ -10,6 +10,7 @@ const getYoutubeID = require("get-youtube-id");
 const fetchVideoInfo = require("youtube-info");
 
 var queue = [];
+var queueNames = [];
 var isPlaying = false;
 var dispatcher = null;
 var voiceChannel = null;
@@ -95,11 +96,15 @@ function playMusic(id, msg) {
 			skipReq = 0;
 			skippers = [];
 			queue.shift();
+			queueNames.shift();
 			if(queue.length === 0) {
 				queue = [];
+				queueNames = [];
 				isPlaying = false;
 			} else {
-				playMusic(queue[0], msg);
+				setTimeout(function() {
+					playMusic(queue[0], msg);
+				}, 500);
 			}
 		});
 	});
@@ -108,12 +113,9 @@ function playMusic(id, msg) {
 bot.on("ready", function() {
 	bot.user.setActivity("with DJ Set");
 	console.log("I am weady UwU!");
-	if(isPlaying === true) {
-		bot.user.setActivity(videoInfo.title);
-	}
 });
 
-bot.on("message", function(msg) {
+bot.on("message", function(msg, ops) {
 	var voicechannel = msg.member.voiceChannel;
 
 	switch(msg.content) {
@@ -142,7 +144,7 @@ bot.on("message", function(msg) {
 				timestamp: new Date(),
 				footer: {
 					icon_url:bot.user.displayAvatarURL,
-					text: "Hope you enjoy my new wemix! UwU"
+					text: "Hope you enjoy my new wemix! UwU (0w0 version 1.0)"
 				}
 			}
 		});
@@ -201,12 +203,6 @@ bot.on("message", function(msg) {
 				break;*/
 			// Do not use this play command above
 
-			case config.prefix + "play": 
-
-				break;
-			case config.prefix + "skip":
-
-				break;
 			}
 		}
 );
@@ -218,22 +214,24 @@ bot.on("message", function(msg, args) {
 	var args = msg.content.split(" ").slice(1).join(" ");
 
 	if(mess.startsWith(config.prefix + "play"))  {
-		if(member.voiceChannel || bot.guilds.get("409417571574480896").voiceConnection != null) {
+		if(msg.member.voiceChannel || voiceChannel != null) {
 			if(queue.length > 0 || isPlaying) {
 				getID(args, function(id) {
 					add_to_queue(id);
 					fetchVideoInfo(id, function(err, videoInfo) {
 						if(err) throw new Error(err);
 						msg.reply(" Added to queue UwU: **" + videoInfo.title + "**");
+						queueNames.push(videoInfo.title);
 					});
 				});
 			} else {
 				isPlaying = true;
 				getID(args, function(id) {
-					queue.push("placeholder");
+					queue.push("id");
 					playMusic(id, msg);
 					fetchVideoInfo(id, function(err, videoInfo) {
 						if(err) throw new Error(err);
+						queueNames.push(videoInfo.title);
 						msg.reply(" Now pwaying UwU: **" + videoInfo.title + "**");
 					});
 				});
@@ -242,18 +240,22 @@ bot.on("message", function(msg, args) {
 		msg.reply(" You need to be in voice channew UmU!!!");
 	}
 	} else if (mess.startsWith(config.prefix + "skip")) {
-		if(skippers.indexOf(msg.author.id) === -1) {
-			skippers.push(msg.author.id);
-			skipReq++;
-			if(skipReq >= Math.ceil((voiceChannel.members.size - 1) / 2)) {
-				skipSong(msg);
-				msg.reply(" Youw skip was acknowedged UwU!!!");
+		skipSong(msg);
+		msg.reply(" Youw skip was acknowedged UwU!!!");
+	} else if (mess.startsWith(config.prefix + "queue")) {
+		var msg2 = "```";
+		for (var i = 0; i < queueNames.length; i++) {
+			var temp = (i + 1) + ": " + queueNames[i] + (i === 0 ? " **(Current Song)**" : "") + "\n";
+			if((msg2 + temp).length <= 2000 - 3) {
+				msg2 += temp;
 			} else {
-				msg.reply(" You need **" + Math.ceil((voiceChannel.members.size - 1) / 2) - skipReq) + "** mowe skip votes UmU";
+				msg2 += "```"
+				msg.channel.send(msg2);
+				msg2 = "```";
 			}
-		} else {
-			msg.reply(" You aweady voted to skip!!! UwU");
 		}
+		msg2 += "```";
+		msg.channel.send(msg2);
 	}
 });
 
