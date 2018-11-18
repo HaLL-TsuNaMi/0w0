@@ -67,13 +67,13 @@ function add_to_queue(strID) {
 }
 
 function search_video(query, callback) {
-    request("https://www.googleapis.com/youtube/v3/search?part=id&type=video&q=" + encodeURIComponent(query) + "&key=" + config.ytKey, function(error, response, body) {
-        var json = JSON.parse(body);
-        if (!json.items[0]) callback("3_-a9nVZYjk");
-        else {
-            callback(json.items[0].id.videoId);
-        }
-    });
+	request("https://www.googleapis.com/youtube/v3/search?part=id&type=video&q=" + encodeURIComponent(query) + "&key=" + config.ytKey, function(error, response, body) {
+		var json = JSON.parse(body);
+		if (!json.items[0]) callback("3_-a9nVZYjk");
+		else {
+			callback(json.items[0].id.videoId);
+		}
+	});
 }
 
 function isYoutube(str) {
@@ -115,7 +115,7 @@ bot.on("ready", function() {
 	console.log("I am weady UwU!");
 });
 
-bot.on("message", function(msg, ops) {
+bot.on("message", function(msg) {
 	var voicechannel = msg.member.voiceChannel;
 
 	switch(msg.content) {
@@ -159,53 +159,33 @@ bot.on("message", function(msg, ops) {
 					title: "ping, info, shutdown, and the command you just used UwU",
 					timestamp: new Date()
 			}});
-			break;
+		break;
 			//Power commands for 0w0 (Shutdown and Restart)
-			case config.prefix + "restart":
-				resetBot(msg.channel);
-				break;
-			case config.prefix + "shutdown":
-				shutdown(msg.channel);
-				break;
+		case config.prefix + "restart":
+			resetBot(msg.channel);
+		break;
+		case config.prefix + "shutdown":
+			shutdown(msg.channel);
+		break;
 			//Summon and leave command for 0w0
-			case config.prefix + "leave":
-                voicechannel.leave();
-                msg.reply("Don't have to be so wude I wiww weave UmU");
-                break;
-            case config.prefix + "summon":
-				if(msg.member.voiceChannel) {
-					if(!msg.guild.voiceConnection) {
-						voicechannel.join()
-							.then(connection => {
-								msg.reply("I've been summoned!!! UwU");
-							});
-					}
-				} else {
-					msg.reply("You must be in a voice channew UmU!!!");
+		case config.prefix + "leave":
+			voicechannel.leave();
+			msg.reply("Don't have to be so wude I wiww weave UmU");
+		break;
+		case config.prefix + "summon":
+			if(msg.member.voiceChannel) {
+				if(!msg.guild.voiceConnection) {
+					voicechannel.join()
+						.then(connection => {
+							msg.reply("I've been summoned!!! UwU");
+						});
 				}
-				break;
-			// Old music command i need to test out again
-			/*case config.prefix + "play":
-				const ytdl = require('ytdl-core');
-				const streamOptions = { seek: 0, volume: 1 };
-				const broadcast = bot.createVoiceBroadcast();
-				if (!msg.content.startsWith(config.prefix) || msg.author.bot) return;
-				const args = msg.content.slice(config.prefix.length).split(' ');
-				const command = args.shift().toLowerCase();
-					
-				//play(connection, msg);
-				voiceChannel.join().then(connection => {
-					const stream = ytdl(args[0], { filter : 'audioonly' });
-					broadcast.playStream(stream);
-					const dispatcher = connection.playBroadcast(broadcast);
-            	})
-            	.catch(console.error);
-				break;*/
-			// Do not use this play command above
-
+			} else {
+				msg.reply("You must be in a voice channew UmU!!!");
 			}
+		break;
 		}
-);
+	});
 
 // Music bot commands 0w0
 bot.on("message", function(msg, args) {
