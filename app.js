@@ -169,6 +169,7 @@ bot.on("message", function(msg) {
 		break;
 			//Summon and leave command for 0w0
 		case config.prefix + "leave":
+			queue = [];
 			voicechannel.leave();
 			msg.reply("Don't have to be so wude I wiww weave UmU");
 		break;
@@ -193,7 +194,7 @@ bot.on("message", function(msg, args) {
 	const mess = msg.content.toLowerCase();
 	var args = msg.content.split(" ").slice(1).join(" ");
 
-	if(mess.startsWith(config.prefix + "play"))  {
+	if (mess.startsWith(config.prefix + "play"))  {
 		if(msg.member.voiceChannel || voiceChannel != null) {
 			if(queue.length > 0 || isPlaying) {
 				getID(args, function(id) {
@@ -236,6 +237,21 @@ bot.on("message", function(msg, args) {
 		}
 		msg2 += "```";
 		msg.channel.send(msg2);
+	} else if (mess.startsWith(config.prefix + "pause")) {
+		dispatcher.pause();
+	} else if (mess.startsWith(config.prefix + "resume")) {
+		dispatcher.resume();
+	} else if (mess.startsWith(config.prefix + "stop")) {
+		if(!msg.member.voiceChannel) return msg.reply("Youwe not in voice channew UmU");
+		queue = [];
+		dispatcher.end();
+	} else if (mess.startsWith(config.prefix + "volume")) {
+		if (!msg.member.voiceChannel) return msg.channel.send('Youw not in a voice channew UmU');
+		if (!dispatcher) return msg.channel.send('thewe is nothing pwaying UwU');
+		if (!args[0]) return msg.channel.send(`Cuwwent vowume is UwU!!!: **${dispatcher.volume}**`);
+		dispatcher.volume = args[0];
+		dispatcher.setVolume(args[0]/10);
+		return msg.channel.send(`Vowume set to UwU: **${dispatcher.volume}**`);
 	}
 });
 
