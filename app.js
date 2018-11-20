@@ -155,6 +155,7 @@ bot.on("message", function(msg) {
 		break;
 			//Power commands for 0w0 (Shutdown and Restart)
 		case config.prefix + "restart":
+			voicechannel.leave();
 			resetBot(msg.channel);
 		break;
 		case config.prefix + "shutdown":
@@ -178,9 +179,12 @@ bot.on("message", function(msg) {
 				msg.reply("You must be in a voice channew UmU!!!");
 			}
 		break;
-		case config.prefix + "emote":
-			let emote = [];
-		break;
+		/*case config.prefix + "emote":
+			let emote = ["(◍•ᴗ•◍)❤", "✩◝(◍⌣̎◍)◜✩", "!(•̀ᴗ•́)و ̑̑", "(ง ͡ʘ ͜ʖ ͡ʘ)ง", "╭∩╮(-_-)╭∩╮", "(ಥ⌣ಥ)", "( ͡° ͜ʖ ͡°)", "(。^_・)ノ", "ᕙ༼*◕_◕*༽ᕤ", "└(=^‥^=)┐", "¯\_༼ ಥ ‿ ಥ ༽_/¯", 
+			"(′︿‵｡)", "٩(ↀДↀ)۶", "ʕ•͡-•ʔ", "ʕʘ̅͜ʘ̅ʔ", "(✖╭╮✖)", "┌(˘⌣˘)ʃ", "(｡♥‿♥｡)", "꒰⑅•ᴗ•⑅꒱"];
+
+			msg.reply();
+		break;*/
 		}
 	});
 
