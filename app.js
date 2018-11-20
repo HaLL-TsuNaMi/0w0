@@ -84,7 +84,7 @@ function skipSong (msg) {
 	dispatcher.end();
 }
 
-function playMusic(id, msg) {
+function playMusic(id, msg, args) {
 	voiceChannel = msg.member.voiceChannel;
 	voiceChannel.join().then(function(connection) {
 		stream = ytdl("https://www.youtube.com/watch?v=" + id, { filter: "audioonly"});
@@ -92,6 +92,7 @@ function playMusic(id, msg) {
 		skippers = [];
 
 		dispatcher = connection.playStream(stream);
+		dispatcher.setVolume(5/10);
 		dispatcher.on("end", function() {
 			skipReq = 0;
 			skippers = [];
@@ -149,16 +150,8 @@ bot.on("message", function(msg) {
 			}
 		});
 			break;
-		case config.prefix + "commands":
-			msg.reply({embed: {
-				color: 0x7FADF8,
-				author: {
-					name: bot.user.username,
-					icon_url: bot.user.displayAvatarURL
-				},
-					title: "ping, info, shutdown, and the command you just used UwU",
-					timestamp: new Date()
-			}});
+		case config.prefix + "help":
+			msg.reply("``` *ping, *info, *restart, *shutdown, *leave, *summon, *play, *skip, *queue, *pause, *resume, *stop, *volume [UwU these are all of the commands] ```");
 		break;
 			//Power commands for 0w0 (Shutdown and Restart)
 		case config.prefix + "restart":
@@ -184,6 +177,9 @@ bot.on("message", function(msg) {
 			} else {
 				msg.reply("You must be in a voice channew UmU!!!");
 			}
+		break;
+		case config.prefix + "emote":
+			let emote = [];
 		break;
 		}
 	});
