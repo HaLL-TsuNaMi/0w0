@@ -92,7 +92,7 @@ function playMusic(id, msg, args) {
 		skippers = [];
 
 		dispatcher = connection.playStream(stream);
-		dispatcher.setVolume(5/10);
+		dispatcher.setVolume(2/10);
 		dispatcher.on("end", function() {
 			skipReq = 0;
 			skippers = [];
@@ -111,10 +111,18 @@ function playMusic(id, msg, args) {
 	});
 }
 
+bot.on("warn", console.warn);
+
+bot.on("error", console.error);
+
 bot.on("ready", function() {
 	bot.user.setActivity("with DJ Set");
 	console.log("I am weady UwU!");
 });
+
+bot.on("disconnect", () => console.log("I just disconnected, I weconnect now UwU"));
+
+bot.on("reconnecting", () => console.log("I am weconnecting now UwU"));
 
 bot.on("message", function(msg) {
 	var voicechannel = msg.member.voiceChannel;
@@ -193,7 +201,7 @@ bot.on("message", function(msg, args) {
 	const member = msg.member;
 	const mess = msg.content.toLowerCase();
 	var args = msg.content.split(" ").slice(1).join(" ");
-
+	
 	if (mess.startsWith(config.prefix + "play"))  {
 		if(msg.member.voiceChannel || voiceChannel != null) {
 			if(queue.length > 0 || isPlaying) {
