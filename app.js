@@ -122,8 +122,6 @@ bot.on("ready", function() {
 
 bot.on("disconnect", () => console.log("I just disconnected, I weconnect now UwU"));
 
-bot.on("reconnecting", () => console.log("I am weconnecting now UwU"));
-
 bot.on("message", function(msg) {
 	var voicechannel = msg.member.voiceChannel;
 
