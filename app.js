@@ -120,7 +120,7 @@ bot.on("ready", function() {
 	console.log("I am weady UwU!");
 });
 
-bot.on("disconnect", () => console.log("I just disconnected, I weconnect now UwU"));
+bot.on("disconnect", () => console.log("I just disconnected UwU"));
 
 bot.on("message", function(msg) {
 	var voicechannel = msg.member.voiceChannel;
