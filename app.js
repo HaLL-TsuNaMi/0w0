@@ -80,7 +80,7 @@ function isYoutube(str) {
 	return str.toLowerCase().indexOf("youtube.com") > -1;
 }
 
-function skipSong (msg) {
+function skipSong(msg) {
 	dispatcher.end();
 }
 
