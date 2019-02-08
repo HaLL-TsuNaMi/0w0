@@ -137,6 +137,7 @@ bot.on("message", function(msg) {
 					title: "pong UwU",
 					timestamp: new Date()
 			}});
+			console.log("pong UwU");
 			break;
 		case config.prefix + "info":
 			msg.reply({embed: {
@@ -155,25 +156,31 @@ bot.on("message", function(msg) {
 				}
 			}
 		});
+			console.log("Infowmation about ME! 0w0");
 			break;
 		case config.prefix + "help":
 			msg.reply("``` *ping, *info, *restart, *shutdown, *leave, *summon, *play, *skip, *queue, *pause, *resume, *stop, *volume [UwU these are all of the commands] ```");
+			console.log("*ping, *info, *restart, *shutdown, *leave, *summon, *play, *skip, *queue, *pause, *resume, *stop, *volume \n [UwU these are all of the commands]");
 		break;
 			//Power commands for 0w0 (Shutdown and Restart)
 		case config.prefix + "restart":
+			console.log("0w0: Restarting...");
 			voicechannel.leave();
 			resetBot(msg.channel);
 		break;
 		case config.prefix + "shutdown":
+			console.log("0w0: Shuttingdown...");
 			shutdown(msg.channel);
 		break;
 			//Summon and leave command for 0w0
 		case config.prefix + "leave":
+			console.log("Don't have to be so wude I wiww weave UmU");
 			queue = [];
 			voicechannel.leave();
 			msg.reply("Don't have to be so wude I wiww weave UmU");
 		break;
 		case config.prefix + "summon":
+			console.log("I've been summoned!!! UwU");
 			if(msg.member.voiceChannel) {
 				if(!msg.guild.voiceConnection) {
 					voicechannel.join()
@@ -185,12 +192,13 @@ bot.on("message", function(msg) {
 				msg.reply("You must be in a voice channew UmU!!!");
 			}
 		break;
-		/*case config.prefix + "emote":
+		case config.prefix + "emote":
 			let emote = ["(◍•ᴗ•◍)❤", "✩◝(◍⌣̎◍)◜✩", "!(•̀ᴗ•́)و ̑̑", "(ง ͡ʘ ͜ʖ ͡ʘ)ง", "╭∩╮(-_-)╭∩╮", "(ಥ⌣ಥ)", "( ͡° ͜ʖ ͡°)", "(。^_・)ノ", "ᕙ༼*◕_◕*༽ᕤ", "└(=^‥^=)┐", "¯\_༼ ಥ ‿ ಥ ༽_/¯", 
-			"(′︿‵｡)", "٩(ↀДↀ)۶", "ʕ•͡-•ʔ", "ʕʘ̅͜ʘ̅ʔ", "(✖╭╮✖)", "┌(˘⌣˘)ʃ", "(｡♥‿♥｡)", "꒰⑅•ᴗ•⑅꒱"];
+			"(′︿‵｡)", "٩(ↀДↀ)۶", "ʕ•͡-•ʔ", "ʕʘ̅͜ʘ̅ʔ", "(✖╭╮✖)", "┌(˘⌣˘)ʃ", "(｡♥‿♥｡)", "꒰⑅•ᴗ•⑅꒱", ];
 
-			msg.reply();
-		break;*/
+			msg.reply(emote[Math.floor(Math.random()*emote.length)]);
+			console.log(emote[Math.floor(Math.random()*emote.length)]);
+		break;
 		}
 	});
 
@@ -220,6 +228,7 @@ bot.on("message", function(msg, args) {
 						if(err) throw new Error(err);
 						queueNames.push(videoInfo.title);
 						msg.reply(" Now pwaying UwU: **" + videoInfo.title + "**");
+						console.log(" Now pwaying UwU: **" + videoInfo.title + "**");
 					});
 				});
 		}
@@ -229,6 +238,7 @@ bot.on("message", function(msg, args) {
 	} else if (mess.startsWith(config.prefix + "skip")) {
 		skipSong(msg);
 		msg.reply(" Youw skip was acknowedged UwU!!!");
+		console.log(" Youw skip was acknowedged UwU!!!");
 	} else if (mess.startsWith(config.prefix + "queue")) {
 		var msg2 = "```";
 		for (var i = 0; i < queueNames.length; i++) {
@@ -243,20 +253,25 @@ bot.on("message", function(msg, args) {
 		}
 		msg2 += "```";
 		msg.channel.send(msg2);
+		console.log("msg2 += temp");
 	} else if (mess.startsWith(config.prefix + "pause")) {
 		dispatcher.pause();
+		console.log("pause UwU");
 	} else if (mess.startsWith(config.prefix + "resume")) {
 		dispatcher.resume();
+		console.log("resumed youwe music UwU");
 	} else if (mess.startsWith(config.prefix + "stop")) {
 		if(!msg.member.voiceChannel) return msg.reply("Youwe not in voice channew UmU");
 		queue = [];
 		dispatcher.end();
+		console.log("done stopped all the music UwU");
 	} else if (mess.startsWith(config.prefix + "volume")) {
 		if (!msg.member.voiceChannel) return msg.channel.send('Youw not in a voice channew UmU');
 		if (!dispatcher) return msg.channel.send('thewe is nothing pwaying UwU');
 		if (!args[0]) return msg.channel.send(`Cuwwent vowume is UwU!!!: **${dispatcher.volume}**`);
 		dispatcher.volume = args[0];
 		dispatcher.setVolume(args[0]/10);
+		console.log(`Vowume set to UwU: **${dispatcher.volume}**`);
 		return msg.channel.send(`Vowume set to UwU: **${dispatcher.volume}**`);
 	}
 });
