@@ -1,3 +1,4 @@
+// Libraries
 const Discord = require("discord.js");
 const bot = new Discord.Client();
 const config = require("./config.json");
@@ -8,6 +9,7 @@ const fs = require("fs");
 const pack = require("./package.json");
 const getYoutubeID = require("get-youtube-id");
 const fetchVideoInfo = require("youtube-info");
+bot.commands = new Discord.Collection();
 
 var queue = [];
 var queueNames = [];
@@ -111,96 +113,49 @@ function playMusic(id, msg, args) {
 	});
 }
 
+// Reads files then logs them in the terminal
+fs.readdir("./commands/", (err, files) => {
+	if (err) console.log(err);
+
+	let jsFile = files.filter(f => f.split(".").pop() == "js");
+
+	if(jsFile.length <= 0) {
+		console.log("I couwdn't find fiwes im sowwy UmU");
+		return;
+	}
+
+	jsFile.forEach ((f, i) => {
+		let props = require(`./commands/${f}`);
+		console.log(`${f} woaded UwU!`);
+		bot.commands.set(props.help.name, props);
+	});
+
+});
+
+// Logs warnings
 bot.on("warn", console.warn);
 
+// Logs errrors
 bot.on("error", console.error);
 
+// Logs when everything is ready to go
 bot.on("ready", function() {
 	bot.user.setActivity("with DJ Set");
 	console.log("I am weady UwU!");
 });
 
+// Logs when disconnected from voicechannel
 bot.on("disconnect", () => console.log("I just disconnected UwU"));
 
+// Reads files and puts code ready to run
 bot.on("message", function(msg) {
-	var voicechannel = msg.member.voiceChannel;
-
-	switch(msg.content) {
-		// Basic 0w0 commands
-		case config.prefix + "ping":
-			msg.reply({embed: {
-				color: 0x7FADF8,
-				author: {
-					name: bot.user.username,
-					icon_url: bot.user.displayAvatarURL
-				},
-					title: "pong UwU",
-					timestamp: new Date()
-			}});
-			console.log("pong UwU");
-			break;
-		case config.prefix + "info":
-			msg.reply({embed: {
-				color: 0x7FADF8,
-				author: {
-				name: bot.user.username,
-				icon_url: bot.user.displayAvatarURL
-			},
-				title: "Infowmation about ME! 0w0",
-				url: "https://github.com/HaLL-TsuNaMi/0w0",
-				description: "I'm bak and bettew than evew, now I can pway youw songs with my new DJ set that I got! UwU",
-				timestamp: new Date(),
-				footer: {
-					icon_url:bot.user.displayAvatarURL,
-					text: "Hope you enjoy my new wemix! UwU (0w0 version 1.0)"
-				}
-			}
-		});
-			console.log("Infowmation about ME! 0w0");
-			break;
-		case config.prefix + "help":
-			msg.reply("``` *ping, *info, *restart, *shutdown, *leave, *summon, *play, *skip, *queue, *pause, *resume, *stop, *volume [UwU these are all of the commands] ```");
-			console.log("*ping, *info, *restart, *shutdown, *leave, *summon, *play, *skip, *queue, *pause, *resume, *stop, *volume \n [UwU these are all of the commands]");
-		break;
-			//Power commands for 0w0 (Shutdown and Restart)
-		case config.prefix + "restart":
-			console.log("0w0: Restarting...");
-			voicechannel.leave();
-			resetBot(msg.channel);
-		break;
-		case config.prefix + "shutdown":
-			console.log("0w0: Shuttingdown...");
-			shutdown(msg.channel);
-		break;
-			//Summon and leave command for 0w0
-		case config.prefix + "leave":
-			console.log("Don't have to be so wude I wiww weave UmU");
-			queue = [];
-			voicechannel.leave();
-			msg.reply("Don't have to be so wude I wiww weave UmU");
-		break;
-		case config.prefix + "summon":
-			console.log("I've been summoned!!! UwU");
-			if(msg.member.voiceChannel) {
-				if(!msg.guild.voiceConnection) {
-					voicechannel.join()
-						.then(connection => {
-							msg.reply("I've been summoned!!! UwU");
-						});
-				}
-			} else {
-				msg.reply("You must be in a voice channew UmU!!!");
-			}
-		break;
-		case config.prefix + "emote":
-			let emote = ["(◍•ᴗ•◍)❤", "✩◝(◍⌣̎◍)◜✩", "!(•̀ᴗ•́)و ̑̑", "(ง ͡ʘ ͜ʖ ͡ʘ)ง", "╭∩╮(-_-)╭∩╮", "(ಥ⌣ಥ)", "( ͡° ͜ʖ ͡°)", "(。^_・)ノ", "ᕙ༼*◕_◕*༽ᕤ", "└(=^‥^=)┐", "¯\_༼ ಥ ‿ ಥ ༽_/¯", 
-			"(′︿‵｡)", "٩(ↀДↀ)۶", "ʕ•͡-•ʔ", "ʕʘ̅͜ʘ̅ʔ", "(✖╭╮✖)", "┌(˘⌣˘)ʃ", "(｡♥‿♥｡)", "꒰⑅•ᴗ•⑅꒱", ];
-
-			msg.reply(emote[Math.floor(Math.random()*emote.length)]);
-			console.log(emote[Math.floor(Math.random()*emote.length)]);
-		break;
-		}
-	});
+	/*var voicechannel = msg.member.voiceChannel;*/
+	let msgArray = msg.content.split(" ");
+	let cmd = msgArray[0];
+	let args = msgArray.slice(1);
+	let commandfile = bot.commands.get(cmd.slice(config.prefix.length));
+	if(commandfile) commandfile.run(bot,msg,args);
+});
 
 // Music bot commands 0w0
 bot.on("message", function(msg, args) {
