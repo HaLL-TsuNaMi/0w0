@@ -1,3 +1,4 @@
+// Libraries
 const Discord = require("discord.js");
 const bot = new Discord.Client();
 const config = require("./config.json");
@@ -10,6 +11,7 @@ const getYoutubeID = require("get-youtube-id");
 const fetchVideoInfo = require("youtube-info");
 bot.commands = new Discord.Collection();
 
+// Reads files then logs them in the terminal
 fs.readdir("./commands/", (err, files) => {
 	if (err) console.log(err);
 
@@ -28,17 +30,22 @@ fs.readdir("./commands/", (err, files) => {
 
 });
 
+// Logs warnings
 bot.on("warn", console.warn);
 
+// Logs errrors
 bot.on("error", console.error);
 
+// Logs when everything is ready to go
 bot.on("ready", function() {
 	bot.user.setActivity("with DJ Set");
 	console.log("I am weady UwU!");
 });
 
+// Logs when disconnected from voicechannel
 bot.on("disconnect", () => console.log("I just disconnected UwU"));
 
+// Reads files and puts code ready to run
 bot.on("message", function(msg) {
 	var voicechannel = msg.member.voiceChannel;
 	let msgArray = msg.content.split(" ");
@@ -49,6 +56,7 @@ bot.on("message", function(msg) {
 	});
 
 // Music bot commands 0w0
+// Will be delted later
 bot.on("message", function(msg, args) {
 	var queue = [];
 	var queueNames = [];
@@ -93,5 +101,6 @@ bot.on("message", function(msg, args) {
 		return msg.channel.send(`Vowume set to UwU: **${dispatcher.volume}**`);
 	}
 });
+// End of maybe deleted code
 
 bot.login(config.token);
