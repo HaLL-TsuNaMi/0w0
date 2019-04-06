@@ -8,108 +8,25 @@ const fs = require("fs");
 const pack = require("./package.json");
 const getYoutubeID = require("get-youtube-id");
 const fetchVideoInfo = require("youtube-info");
+bot.commands = new Discord.Collection();
 
-var queue = [];
-var queueNames = [];
-var isPlaying = false;
-var dispatcher = null;
-var voiceChannel = null;
-var skipReq = 0;
-var skippers = [];
+fs.readdir("./commands/", (err, files) => {
+	if (err) console.log(err);
 
-function resetBot(channel) {
-	channel.send({embed: {
-		color: 0x7FADF8,
-		author: {
-			name: bot.user.username,
-			icon_url: bot.user.displayAvatarURL
-		},
-			title: "Restarting 0w0...",
-			description: "I wiww be wight bak evewyone >w<!",
-			timestamp: new Date()
-	}});
-	bot.destroy();
-	bot.login(config.token);
-}
+	let jsFile = files.filter(f => f.split(".").pop() == "js");
 
-function shutdown(channel) {
-	channel.send({embed: {
-		color: 0x7FADF8,
-		author: {
-			name: bot.user.username,
-			icon_url: bot.user.displayAvatarURL
-		},
-			title: "Good Bye Message UwU",
-			description: "I'm gonna take a nap!!! Good baii evewyone I wiww miss y'aww UwU",
-			timestamp: new Date()
-		}
-	});
-	console.log("Good Baii!!! UwU");
-	bot.destroy();
-}
-
-function getID(str, cb) {
-	if(isYoutube(str)) {
-		cb(getYoutubeID(str));
-	} else {
-		search_video(str, function(id) {
-			cb(id);
-		});
+	if(jsFile.length <= 0) {
+		console.log("I couwdn't find fiwes im sowwy UmU");
+		return;
 	}
-}
 
-function add_to_queue(strID) {
-	if(isYoutube(strID)) {
-		queue.push(getYoutubeID(strID));
-	} else {
-		queue.push(strID);
-	}
-}
-
-function search_video(query, callback) {
-	request("https://www.googleapis.com/youtube/v3/search?part=id&type=video&q=" + encodeURIComponent(query) + "&key=" + config.ytKey, function(error, response, body) {
-		var json = JSON.parse(body);
-		if (!json.items[0]) callback("3_-a9nVZYjk");
-		else {
-			callback(json.items[0].id.videoId);
-		}
+	jsFile.forEach ((f, i) => {
+		let props = require(`./commands/${f}`);
+		console.log(`${f} woaded UwU!`);
+		bot.commands.set(props.help.name, props);
 	});
-}
 
-function isYoutube(str) {
-	return str.toLowerCase().indexOf("youtube.com") > -1;
-}
-
-function skipSong(msg) {
-	dispatcher.end();
-}
-
-function playMusic(id, msg, args) {
-	voiceChannel = msg.member.voiceChannel;
-	voiceChannel.join().then(function(connection) {
-		stream = ytdl("https://www.youtube.com/watch?v=" + id, { filter: "audioonly"});
-		skipReq = 0;
-		skippers = [];
-
-		dispatcher = connection.playStream(stream);
-		dispatcher.setVolume(2/10);
-		dispatcher.on("end", function() {
-			skipReq = 0;
-			skippers = [];
-			queue.shift();
-			queueNames.shift();
-			if(queue.length === 0) {
-				queue = [];
-				queueNames = [];
-				isPlaying = false;
-			} else {
-				setTimeout(function() {
-					playMusic(queue[0], msg);
-				}, 500);
-			}
-		});
-	});
-}
+});
 
 bot.on("warn", console.warn);
 
@@ -124,122 +41,26 @@ bot.on("disconnect", () => console.log("I just disconnected UwU"));
 
 bot.on("message", function(msg) {
 	var voicechannel = msg.member.voiceChannel;
-
-	switch(msg.content) {
-		// Basic 0w0 commands
-		case config.prefix + "ping":
-			msg.reply({embed: {
-				color: 0x7FADF8,
-				author: {
-					name: bot.user.username,
-					icon_url: bot.user.displayAvatarURL
-				},
-					title: "pong UwU",
-					timestamp: new Date()
-			}});
-			console.log("pong UwU");
-			break;
-		case config.prefix + "info":
-			msg.reply({embed: {
-				color: 0x7FADF8,
-				author: {
-				name: bot.user.username,
-				icon_url: bot.user.displayAvatarURL
-			},
-				title: "Infowmation about ME! 0w0",
-				url: "https://github.com/HaLL-TsuNaMi/0w0",
-				description: "I'm bak and bettew than evew, now I can pway youw songs with my new DJ set that I got! UwU",
-				timestamp: new Date(),
-				footer: {
-					icon_url:bot.user.displayAvatarURL,
-					text: "Hope you enjoy my new wemix! UwU (0w0 version 1.0)"
-				}
-			}
-		});
-			console.log("Infowmation about ME! 0w0");
-			break;
-		case config.prefix + "help":
-			msg.reply("``` *ping, *info, *restart, *shutdown, *leave, *summon, *play, *skip, *queue, *pause, *resume, *stop, *volume [UwU these are all of the commands] ```");
-			console.log("*ping, *info, *restart, *shutdown, *leave, *summon, *play, *skip, *queue, *pause, *resume, *stop, *volume \n [UwU these are all of the commands]");
-		break;
-			//Power commands for 0w0 (Shutdown and Restart)
-		case config.prefix + "restart":
-			console.log("0w0: Restarting...");
-			voicechannel.leave();
-			resetBot(msg.channel);
-		break;
-		case config.prefix + "shutdown":
-			console.log("0w0: Shuttingdown...");
-			shutdown(msg.channel);
-		break;
-			//Summon and leave command for 0w0
-		case config.prefix + "leave":
-			console.log("Don't have to be so wude I wiww weave UmU");
-			queue = [];
-			voicechannel.leave();
-			msg.reply("Don't have to be so wude I wiww weave UmU");
-		break;
-		case config.prefix + "summon":
-			console.log("I've been summoned!!! UwU");
-			if(msg.member.voiceChannel) {
-				if(!msg.guild.voiceConnection) {
-					voicechannel.join()
-						.then(connection => {
-							msg.reply("I've been summoned!!! UwU");
-						});
-				}
-			} else {
-				msg.reply("You must be in a voice channew UmU!!!");
-			}
-		break;
-		case config.prefix + "emote":
-			let emote = ["(◍•ᴗ•◍)❤", "✩◝(◍⌣̎◍)◜✩", "!(•̀ᴗ•́)و ̑̑", "(ง ͡ʘ ͜ʖ ͡ʘ)ง", "╭∩╮(-_-)╭∩╮", "(ಥ⌣ಥ)", "( ͡° ͜ʖ ͡°)", "(。^_・)ノ", "ᕙ༼*◕_◕*༽ᕤ", "└(=^‥^=)┐", "¯\_༼ ಥ ‿ ಥ ༽_/¯", 
-			"(′︿‵｡)", "٩(ↀДↀ)۶", "ʕ•͡-•ʔ", "ʕʘ̅͜ʘ̅ʔ", "(✖╭╮✖)", "┌(˘⌣˘)ʃ", "(｡♥‿♥｡)", "꒰⑅•ᴗ•⑅꒱", ];
-
-			msg.reply(emote[Math.floor(Math.random()*emote.length)]);
-			console.log(emote[Math.floor(Math.random()*emote.length)]);
-		break;
-		}
+	let msgArray = msg.content.split(" ");
+	let cmd = msgArray[0];
+	let args = msgArray.slice(1);
+	let commandfile = bot.commands.get(cmd.slice(config.prefix.length));
+	if(commandfile) commandfile.run(bot,msg,args);
 	});
 
 // Music bot commands 0w0
 bot.on("message", function(msg, args) {
+	var queue = [];
+	var queueNames = [];
+	var isPlaying = false;
+	var dispatcher = null;
+	var voiceChannel = null;
+	var skipReq = 0;
+	var skippers = [];
 	const member = msg.member;
 	const mess = msg.content.toLowerCase();
-	var args = msg.content.split(" ").slice(1).join(" ");
 	
-	if (mess.startsWith(config.prefix + "play"))  {
-		if(msg.member.voiceChannel || voiceChannel != null) {
-			if(queue.length > 0 || isPlaying) {
-				getID(args, function(id) {
-					add_to_queue(id);
-					fetchVideoInfo(id, function(err, videoInfo) {
-						if(err) throw new Error(err);
-						msg.reply(" Added to queue UwU: **" + videoInfo.title + "**");
-						queueNames.push(videoInfo.title);
-					});
-				});
-			} else {
-				isPlaying = true;
-				getID(args, function(id) {
-					queue.push("id");
-					playMusic(id, msg);
-					fetchVideoInfo(id, function(err, videoInfo) {
-						if(err) throw new Error(err);
-						queueNames.push(videoInfo.title);
-						msg.reply(" Now pwaying UwU: **" + videoInfo.title + "**");
-						console.log(" Now pwaying UwU: **" + videoInfo.title + "**");
-					});
-				});
-		}
-	} else {
-		msg.reply(" You need to be in voice channew UmU!!!");
-	}
-	} else if (mess.startsWith(config.prefix + "skip")) {
-		skipSong(msg);
-		msg.reply(" Youw skip was acknowedged UwU!!!");
-		console.log(" Youw skip was acknowedged UwU!!!");
-	} else if (mess.startsWith(config.prefix + "queue")) {
+	if (mess.startsWith(config.prefix + "queue")) {
 		var msg2 = "```";
 		for (var i = 0; i < queueNames.length; i++) {
 			var temp = (i + 1) + ": " + queueNames[i] + (i === 0 ? " **(Current Song)**" : "") + "\n";
@@ -254,9 +75,6 @@ bot.on("message", function(msg, args) {
 		msg2 += "```";
 		msg.channel.send(msg2);
 		console.log("msg2 += temp");
-	} else if (mess.startsWith(config.prefix + "pause")) {
-		dispatcher.pause();
-		console.log("pause UwU");
 	} else if (mess.startsWith(config.prefix + "resume")) {
 		dispatcher.resume();
 		console.log("resumed youwe music UwU");
