@@ -19,37 +19,6 @@ var voiceChannel = null;
 var skipReq = 0;
 var skippers = [];
 
-function resetBot(channel) {
-	channel.send({embed: {
-		color: 0x7FADF8,
-		author: {
-			name: bot.user.username,
-			icon_url: bot.user.displayAvatarURL
-		},
-			title: "Restarting 0w0...",
-			description: "I wiww be wight bak evewyone >w<!",
-			timestamp: new Date()
-	}});
-	bot.destroy();
-	bot.login(config.token);
-}
-
-function shutdown(channel) {
-	channel.send({embed: {
-		color: 0x7FADF8,
-		author: {
-			name: bot.user.username,
-			icon_url: bot.user.displayAvatarURL
-		},
-			title: "Good Bye Message UwU",
-			description: "I'm gonna take a nap!!! Good baii evewyone I wiww miss y'aww UwU",
-			timestamp: new Date()
-		}
-	});
-	console.log("Good Baii!!! UwU");
-	bot.destroy();
-}
-
 function getID(str, cb) {
 	if(isYoutube(str)) {
 		cb(getYoutubeID(str));
@@ -149,7 +118,6 @@ bot.on("disconnect", () => console.log("I just disconnected UwU"));
 
 // Reads files and puts code ready to run
 bot.on("message", function(msg) {
-	/*var voicechannel = msg.member.voiceChannel;*/
 	let msgArray = msg.content.split(" ");
 	let cmd = msgArray[0];
 	let args = msgArray.slice(1);
@@ -208,7 +176,7 @@ bot.on("message", function(msg, args) {
 		}
 		msg2 += "```";
 		msg.channel.send(msg2);
-		console.log("msg2 += temp");
+		console.log("queue");
 	} else if (mess.startsWith(config.prefix + "pause")) {
 		dispatcher.pause();
 		console.log("pause UwU");
