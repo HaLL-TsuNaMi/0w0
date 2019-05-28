@@ -25,15 +25,15 @@ module.exports.run = async (bot, msg, args) => {
 				timestamp: new Date(),
 				footer: {
 					icon_url:bot.user.displayAvatarURL,
-					text: "Hope you enjoy my new wemix! UwU (0w0 version 1.0)"
+					text: "Hope you enjoy my new wemix! UwU (0w0 version 2.0)"
 				}
 			}
 		});
 			console.log("Infowmation about ME! 0w0");
 			break;
 		case config.prefix + "help":
-			msg.reply("``` *ping, *info, *restart, *shutdown, *leave, *summon, *play, *skip, *queue, *pause, *resume, *stop, *volume [UwU these are all of the commands] ```");
-			console.log("*ping, *info, *restart, *shutdown, *leave, *summon, *play, *skip, *queue, *pause, *resume, *stop, *volume \n [UwU these are all of the commands]");
+			msg.reply("``` *ping, *info, *restart, *shutdown ```");
+			console.log("*ping, *info, *restart, *shutdown");
 		break;
     }
 }
