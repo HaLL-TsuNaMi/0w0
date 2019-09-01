@@ -1,14 +1,6 @@
 const Discord = require("discord.js");
 const config = require("../config.json");
 
-var queue = [];
-var queueNames = [];
-var isPlaying = false;
-var dispatcher = null;
-var voiceChannel = null;
-var skipReq = 0;
-var skippers = [];
-
 module.exports.run = async (bot, msg, args) => {
 	switch(msg.content) {
 		// Basic 0w0 commands
@@ -23,8 +15,8 @@ module.exports.run = async (bot, msg, args) => {
 					timestamp: new Date()
 			}});
 			console.log("pong UwU");
-			break;
-		}
+		break;
+	}
 }
 
 module.exports.help = {

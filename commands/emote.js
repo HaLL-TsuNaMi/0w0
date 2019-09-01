@@ -12,7 +12,7 @@ module.exports.run = async (bot, msg, args) => {
 			msg.reply(emote[Math.floor(Math.random()*emote.length)]);
 			console.log(emote[Math.floor(Math.random()*emote.length)]);
 		break;
-		}
+	}
 }
 
 module.exports.help = {

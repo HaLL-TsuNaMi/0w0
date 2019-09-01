@@ -1,14 +1,6 @@
 const Discord = require("discord.js");
 const config = require("../config.json");
 
-var queue = [];
-var queueNames = [];
-var isPlaying = false;
-var dispatcher = null;
-var voiceChannel = null;
-var skipReq = 0;
-var skippers = [];
-
 module.exports.run = async (bot, msg, args) => {
 	switch(msg.content) {
 		// Basic 0w0 commands
@@ -30,7 +22,7 @@ module.exports.run = async (bot, msg, args) => {
 			}
 		});
 			console.log("Infowmation about ME! 0w0");
-			break;
+		break;
 		case config.prefix + "help":
 			msg.reply("``` *ping, *info, *restart, *shutdown ```");
 			console.log("*ping, *info, *restart, *shutdown");
