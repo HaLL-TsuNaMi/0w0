@@ -2,9 +2,11 @@ const Discord = require("discord.js");
 const config = require("../config.json");
 
 module.exports.run = async (bot, msg, args) => {
-    var voicechannel = msg.member.voiceChannel;
 
+    // function with shutdown command in it
     function shutdown(channel) {
+
+        // embed msg
         channel.send({embed: {
             color: 0x7FADF8,
             author: {
@@ -16,13 +18,16 @@ module.exports.run = async (bot, msg, args) => {
                 timestamp: new Date()
             }
         });
-        console.log("Good Baii!!! UwU");
+
+        // puts txt in console then shuts bot down
+        console.log("0w0: Shuttingdown...");
         bot.destroy();
     }
 
+    // checks msg for prefix + shutdown
     switch(msg.content) {
 		case config.prefix + "shutdown":
-			console.log("0w0: Shuttingdown...");
+            // runs shutdown command
 			shutdown(msg.channel);
         break;
     }

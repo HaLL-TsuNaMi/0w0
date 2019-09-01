@@ -69,4 +69,5 @@ bot.on("message", function(msg) {
 	if(commandfile) commandfile.run(bot,msg,args);
 });
 
+// logs bot into discord and loads all the commands (obviously UwU???? like duh???)
 bot.login(config.token);
