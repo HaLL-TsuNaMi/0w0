@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const config = require("../config.json");
+const package = require("../package.json");
 
 module.exports.run = async (bot, msg, args) => {
 
@@ -28,7 +29,7 @@ module.exports.run = async (bot, msg, args) => {
 				// in smaller txt it tells the version of 0w0 and smol msg from him
 				footer: {
 					icon_url:bot.user.displayAvatarURL,
-					text: "Hope you enjoy my new wemix! UwU (0w0 version 2.0)"
+					text: `Hope you enjoy my new wemix! UwU (0w0 version ${package.version})`
 				}
 			}
 		});
