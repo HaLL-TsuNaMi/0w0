@@ -7,6 +7,7 @@ const pack = require("./package.json");
 bot.commands = new Discord.Collection();
 const nodeOpus = require("node-opus");
 const Music = require("discord.js-musicbot-addon");
+const token = process.env.token;
 
 // Reads files then logs them in the terminal
 fs.readdir("./commands/", (err, files) => {
@@ -70,4 +71,4 @@ bot.on("message", function(msg) {
 });
 
 // logs bot into discord and loads all the commands (obviously UwU???? like duh???)
-bot.login(config.token);
+bot.login(token);
