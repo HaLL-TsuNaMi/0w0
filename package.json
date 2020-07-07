@@ -22,7 +22,7 @@
     "lodash.merge": "^4.6.2",
     "mixin-deep": "^2.0.1",
     "node-opus": "^0.3.2",
-    "npm": "^6.9.0",
+    "npm": "^6.14.6",
     "opusscript": "0.0.6",
     "pollution": "^1.0.1",
     "prototype": "0.0.5",
