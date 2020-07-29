@@ -1,74 +1,93 @@
 // Libraries
-const Discord = require("discord.js");
-const bot = new Discord.Client();
+const { CommandoClient } = require('discord.js-commando');
+const { Structures } = require('discord.js');
+const path = require('path');
 const config = require("./config.json");
-const fs = require("fs");
-const pack = require("./package.json");
-bot.commands = new Discord.Collection();
-const nodeOpus = require("node-opus");
-const Music = require("discord.js-musicbot-addon");
+const pack = require("./package.json")
 const token = process.env.token;
 
-// Reads files then logs them in the terminal
-fs.readdir("./commands/", (err, files) => {
-	if (err) console.log(err);
-
-	let jsFile = files.filter(f => f.split(".").pop() == "js");
-
-	if(jsFile.length <= 0) {
-		console.log("I couwdn't find fiwes im sowwy UmU");
-		return;
+Structures.extend('Guild', function(Guild) {
+	class MusicGuild extends Guild {
+	  constructor(client, data) {
+		super(client, data);
+		this.musicData = {
+		  queue: [],
+		  isPlaying: false,
+		  nowPlaying: null,
+		  songDispatcher: null,
+		  volume: 1
+		};
+		this.triviaData = {
+		  isTriviaRunning: false,
+		  wasTriviaEndCalled: false,
+		  triviaQueue: [],
+		  triviaScore: new Map()
+		};
+	  }
 	}
-
-	jsFile.forEach ((f, i) => {
-		let props = require(`./commands/${f}`);
-		console.log(`${f} woaded UwU!`);
-		bot.commands.set(props.help.name, props);
-	});
-
-});
-
-// Logs warnings
-bot.on("warn", console.warn);
-
-// Logs errrors
-bot.on("error", console.error);
-
-// Logs when everything is ready to go
-bot.on("ready", function() {
-	bot.user.setActivity("with DJ Set");
-	console.log("I am weady UwU!");
-});
-
-// Logs when disconnected from voicechannel
-bot.on("disconnect", () => console.log("I just disconnected UwU"));
-
-// Music command from discord.js-musicbot-addon library (Basic layout)
-Music.start(bot, {
-	youtubeKey: config.ytKey,
-	botPrefix: config.prefix,
-	maxQueueSize: 0,
-	anyoneCanSkip: true,
-	anyoneCanAdjust: true,
-	anyoneCanLeave: true,
-	logging: false,
-	musicPresence: true,
-	clearPresence: true,
-	bigPicture: true,
-	defVolume: 10,
-	help: {
-		enabled: false
+	return MusicGuild;
+  });
+  
+  const client = new CommandoClient ({
+	commandPrefix: config.prefix,
+	owner: config.OwnerID // value comes from config.json
+  });
+  
+  client.registry
+	.registerDefaultTypes()
+	.registerGroups([
+	  ['music', 'Music Command Group'],
+	  ['gifs', 'Gif Command Group'],
+	  ['other', 'random types of commands group'],
+	  ['guild', 'guild related commands']
+	])
+	.registerDefaultGroups()
+	.registerDefaultCommands({
+	  eval: false,
+	  prefix: false,
+	  commandState: false
+	})
+	.registerCommandsIn(path.join(__dirname, 'commands'));
+  
+  client.once('ready', () => {
+	console.log(`*************0w0************`);
+	console.log(`*                          *`);
+	console.log(`*                          *`);
+	console.log(`*   0w0: ${pack.version}             *`);
+	console.log(`*   node: ${pack.engines.node}           *`);
+	console.log(`*   npm: ${pack.dependencies.npm}           *`);
+	console.log(`*                          *`);
+	console.log(`*                          *`);
+	console.log(`*************0w0************`);
+	client.user.setActivity("with DJ Set");
+  });
+  
+  client.on('voiceStateUpdate', async (___, newState) => {
+	if (
+	  newState.member.user.bot &&
+	  !newState.channelID &&
+	  newState.guild.musicData.songDispatcher &&
+	  newState.member.user.id == client.user.id
+	) {
+	  newState.guild.musicData.queue.length = 0;
+	  newState.guild.musicData.songDispatcher.end();
+	  return;
 	}
-});
-
-// Reads files and puts code ready to run
-bot.on("message", function(msg) {
-	let msgArray = msg.content.split(" ");
-	let cmd = msgArray[0];
-	let args = msgArray.slice(1);
-	let commandfile = bot.commands.get(cmd.slice(config.prefix.length));
-	if(commandfile) commandfile.run(bot,msg,args);
-});
+	if (
+	  newState.member.user.bot &&
+	  newState.channelID &&
+	  newState.member.user.id == client.user.id &&
+	  !newState.selfDeaf
+	) {
+	  newState.setSelfDeaf(true);
+	}
+  });
+  
+  client.on('guildMemberAdd', member => {
+	const channel = member.guild.channels.cache.find(ch => ch.name === 'welcome-goodbye'); // change this to the channel name you want to send the greeting to
+	if (!channel) return;
+	channel.send(`Welcome ${member}!`);
+  });
 
 // logs bot into discord and loads all the commands (obviously UwU???? like duh???)
-bot.login(token);
+client.login(token);
