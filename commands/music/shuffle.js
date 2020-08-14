@@ -4,7 +4,8 @@ const { MessageEmbed } = require('discord.js');
 module.exports = class ShuffleQueueCommand extends Command {
   constructor(client) {
     super(client, {
-      name: 'shuffle',
+	  name: 'shuffle',
+	  aliases: ['sh'],
       memberName: 'shuffle',
       group: 'music',
       description: 'Shuffle the song queue',

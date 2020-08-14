@@ -9,7 +9,7 @@ module.exports = class PlayCommand extends Command {
   constructor(client) {
     super(client, {
       name: 'play',
-      aliases: ['play-song', 'add'],
+      aliases: ['play-song', 'add', 'p'],
       memberName: 'play',
       group: 'music',
       description: 'Play any song or playlist from youtube',
@@ -155,7 +155,7 @@ module.exports = class PlayCommand extends Command {
     message.channel
       .awaitMessages(
         function(msg) {
-          return (msg.content > 0 && msg.content < 6) || msg.content === 'exit';
+          return (msg.content > 0 && msg.content < 6) || msg.content.toLowerCase() === 'exit';
         },
         {
           max: 1,
@@ -165,7 +165,7 @@ module.exports = class PlayCommand extends Command {
       )
       .then(function(response) {
         const videoIndex = parseInt(response.first().content);
-        if (response.first().content === 'exit') return songEmbed.delete();
+        if (response.first().content.toLowerCase() === 'exit') return songEmbed.delete();
         youtube
           .getVideoByID(videos[videoIndex - 1].id)
           .then(function(video) {

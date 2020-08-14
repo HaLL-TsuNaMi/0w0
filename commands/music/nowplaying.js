@@ -4,7 +4,8 @@ const { Command } = require('discord.js-commando');
 module.exports = class NowPlayingCommand extends Command {
   constructor(client) {
     super(client, {
-      name: 'nowplaying',
+	  name: 'nowplaying',
+	  aliases: ["np"],
       group: 'music',
       memberName: 'nowplaying',
       aliases: ['np', 'currently-playing', 'now-playing'],

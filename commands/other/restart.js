@@ -6,7 +6,7 @@ module.exports = class RestartCommand extends Command {
 	constructor(client) {
 	  super(client, {
 		name: 'restart',
-		aliases: ['reboot'],
+		aliases: ['reboot', 'res'],
 		group: 'other',
 		memberName: 'restart',
 		guildOnly: true,

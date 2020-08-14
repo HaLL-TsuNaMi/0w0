@@ -3,7 +3,8 @@ const { Command } = require('discord.js-commando');
 module.exports = class SkipToCommand extends Command {
   constructor(client) {
     super(client, {
-      name: 'skipto',
+	  name: 'skipto',
+	  aliases: ['st'],
       memberName: 'skipto',
       group: 'music',
       description:

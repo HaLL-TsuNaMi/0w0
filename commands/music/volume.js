@@ -4,7 +4,7 @@ module.exports = class VolumeCommand extends Command {
   constructor(client) {
     super(client, {
       name: 'volume',
-      aliases: ['change-volume'],
+      aliases: ['change-volume', 'v'],
       group: 'music',
       memberName: 'volume',
       guildOnly: true,

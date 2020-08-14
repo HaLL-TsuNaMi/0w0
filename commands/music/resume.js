@@ -4,7 +4,7 @@ module.exports = class ResumeCommand extends Command {
   constructor(client) {
     super(client, {
       name: 'resume',
-      aliases: ['resume-song', 'continue'],
+      aliases: ['resume-song', 'continue', 'rs'],
       memberName: 'resume',
       group: 'music',
       description: 'Resume the current paused song',

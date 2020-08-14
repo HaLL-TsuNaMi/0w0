@@ -3,7 +3,8 @@ const { Command } = require('discord.js-commando');
 module.exports = class LoopCommand extends Command {
   constructor(client) {
     super(client, {
-      name: 'loop',
+	  name: 'loop',
+	  aliases: ['lp'],
       group: 'music',
       memberName: 'loop',
       guildOnly: true,

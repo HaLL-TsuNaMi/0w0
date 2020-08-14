@@ -4,7 +4,7 @@ module.exports = class SkipAllCommand extends Command {
   constructor(client) {
     super(client, {
       name: 'skipall',
-      aliases: ['skip-all'],
+      aliases: ['skip-all', 'sa'],
       memberName: 'skipall',
       group: 'music',
       description: 'Skip all songs in queue',

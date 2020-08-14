@@ -4,7 +4,7 @@ module.exports = class CoinCommand extends Command {
 	constructor(client) {
 	  super(client, {
 		name: 'coin',
-		aliases: ['flip'],
+		aliases: ['flip', 'c'],
 		group: 'other',
 		memberName: 'coin',
 		guildOnly: true,

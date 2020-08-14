@@ -4,7 +4,7 @@ module.exports = class EmoteCommand extends Command {
 	constructor(client) {
 	  super(client, {
 		name: 'emote',
-		aliases: ['emoticon'],
+		aliases: ['emoticon', 'e'],
 		group: 'other',
 		memberName: 'emote',
 		guildOnly: true,

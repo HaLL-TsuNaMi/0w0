@@ -3,7 +3,8 @@ const { Command } = require('discord.js-commando');
 module.exports = class RemoveSongCommand extends Command {
   constructor(client) {
     super(client, {
-      name: 'remove',
+	  name: 'remove',
+	  aliases: ['rm'],
       memberName: 'remove',
       group: 'music',
       description: 'Remove a specific song from queue',
